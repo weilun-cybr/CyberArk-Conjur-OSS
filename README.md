@@ -226,7 +226,7 @@ The CLI command to set a value is:
 
 conjur variable values add <policy-path-of-variable-name> <secret-value>
 
-For example:
+For example
 ```console
 password=$(openssl rand -hex 12)
 docker-compose exec client conjur variable values add jenkins-app/db_password $password
