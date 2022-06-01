@@ -9,6 +9,12 @@ On the Conjur side, policy defines the Jenkins host and gives it privileges to a
 
 When all configurations are in place, Jenkins scripts and projects simply reference the variable using the configured Jenkins ID.
 
+Please note that this tutorial refers to offical Conjur tutorial at https://docs.conjur.org/Latest/en/Content/Integrations/jenkins.htm.
+
+In this tutorial, you will learn how to secure Jenkins pipelines using Conjur & credentials plugins.
+
+The Conjur Jenkins plugin retrieves secrets from Conjur for use in Jenkins pipeline scripts or Freestyle projects.
+
 ## Benefits
 The Conjur Jenkins integration provides the following advantages to Jenkins DevOps administrators:
 - Security. Secret values are stored and obtained securely. Secrets are not exposed in Jenkins jobs or referenced files.
