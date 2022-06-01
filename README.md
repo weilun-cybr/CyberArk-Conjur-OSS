@@ -51,16 +51,14 @@ If any of the plugin failed to be installed, don't worry, we will make sure the 
 
 Create an user called **admin** & password **344827fbdbfb40d5aac067c7a07b9230** to complete the setup
 
+## 2.0 Setup Conjur
+If you'd need more details, check out https://www.conjur.org/get-started/install-conjur.html.
 
-### 1.1 Note on SELinux and Container Volumes
-Put in something
+### 2.1 Download & Pull
+In your terminal, download the Conjur quick-start configuration. It will take a few minutes to pull the images.
 
-## 2.0 Setup host prerequisites
-Start something else
-
-### 2.1 Note on SELinux and Container Volumes
-Talk about that something else. 
 ```console
-My word.
-Oh my god.
+curl -o docker-compose.yml https://quincycheng.github.io/docker-compose.quickstart.yml
+docker-compose pull
 ```
+
