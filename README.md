@@ -25,11 +25,32 @@ The Conjur Jenkins integration provides the following advantages to Jenkins DevO
 - Simplification. The plugin simplifies Jenkins job and project creation by requiring only a reference ID to a secret.
 - Familiarity. The plugin is configured using the Jenkins UI, a familiar interface for Jenkins users.
 
-## 1.0 Setup host prerequisites
-Sample Code:
+## 1.0 Setup Jenkins
+Launch Jenkins as a Docker Container with the following command:
 ```console
-conjur policy load -b root -f app-vars.yaml
+mkdir jenkins_home
+docker run -d -u root --name jenkins \
+    -p 8181:8080 -p 50000:50000 \
+    -v ${pwd}/jenkins_home:/var/jenkins_home \
+    jenkins/jenkins:lts
 ```
+
+It will take a few minutes to start Jenkins. Meanwhile, let's move on to next step and start deploying Conjur
+
+Visit the Jenkins Console. This should be https://<IPAddress>:8181.
+
+While prompt for initial password, input the response by this command
+  
+```console
+docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+In the next screen, select **Install suggested plugins**.
+
+If any of the plugin failed to be installed, don't worry, we will make sure the necessary plugins work properly in the next few steps.
+
+Create an user called **admin** & password **344827fbdbfb40d5aac067c7a07b9230** to complete the setup
+
 
 ### 1.1 Note on SELinux and Container Volumes
 Put in something
