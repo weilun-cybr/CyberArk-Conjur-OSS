@@ -1,6 +1,6 @@
 # CyberArk-Conjur-OSS
 
-# Overview
+## Overview
 The conjur-credentials-plugin makes secrets stored in an existing Conjur database available to Jenkins jobs. Jenkins jobs can authenticate to Conjur and access specific secret values for which they have authorization. You store and manage the secrets in Conjur.
 
 We provide the plugin binary, which you install and configure on your Jenkins host.
@@ -9,7 +9,7 @@ On the Conjur side, policy defines the Jenkins host and gives it privileges to a
 
 When all configurations are in place, Jenkins scripts and projects simply reference the variable using the configured Jenkins ID.
 
-# Benefits
+## Benefits
 The Conjur Jenkins integration provides the following advantages to Jenkins DevOps administrators:
 - Security. Secret values are stored and obtained securely. Secrets are not exposed in Jenkins jobs or referenced files.
 - Central management. Secrets are managed in a central location, either in Conjur or in the CyberArk Vault if you are using the Vault Conjur Synchronizer.
@@ -19,19 +19,19 @@ The Conjur Jenkins integration provides the following advantages to Jenkins DevO
 - Simplification. The plugin simplifies Jenkins job and project creation by requiring only a reference ID to a secret.
 - Familiarity. The plugin is configured using the Jenkins UI, a familiar interface for Jenkins users.
 
-# 1.0 Setup host prerequisites
+## 1.0 Setup host prerequisites
 Sample Code:
 ```console
 conjur policy load -b root -f app-vars.yaml
 ```
 
-## 1.1 Note on SELinux and Container Volumes
+### 1.1 Note on SELinux and Container Volumes
 Put in something
 
-# 2.0 Setup host prerequisites
+## 2.0 Setup host prerequisites
 Start something else
 
-## 2.1 Note on SELinux and Container Volumes
+### 2.1 Note on SELinux and Container Volumes
 Talk about that something else. 
 ```console
 My word.
