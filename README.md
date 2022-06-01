@@ -47,11 +47,9 @@ It will take a few minutes to start Jenkins. Meanwhile, let's move on to next st
 Visit the Jenkins Console. This should be **http://(yourIPAddress):8181**.
 
 While prompt for initial password, input the response by this command
-  
 ```console
 docker exec -it jenkins cat /var/jenkins_home/secrets/initialAdminPassword
 ```
-
 In the next screen, select **Install suggested plugins**.
 
 If any of the plugin failed to be installed, don't worry, we will make sure the necessary plugins work properly in the next few steps.
@@ -63,38 +61,31 @@ If you'd need more details, check out https://www.conjur.org/get-started/install
 
 ### 2.1 Download & Pull
 In your terminal, download the Conjur quick-start configuration. It will take a few minutes to pull the images.
-
 ```console
 curl -o docker-compose.yml https://quincycheng.github.io/docker-compose.quickstart.yml
 docker-compose pull
 ```
-
 ### 2.2 Generate Master Key
 Generate your master data key and load it into the environment:
-
 ```console
 docker-compose run --no-deps --rm conjur data-key generate > data_key
 ```
 **Prevent data loss: The conjurctl conjur data-key generate command gives you a master data key. Back it up in a safe location.**
 
 ### 2.3 To run the Conjur server, database and client:
-
 ```console
 export CONJUR_DATA_KEY="$(< data_key)"
 docker-compose up -d
 ```
-
 To verify the containers are up & running, run **docker ps**
 
 The result should be similar to the following:
 ![Alt text](docker-ps.PNG?raw=true "docker ps")
 
 To create a default account (eg. quick-start):
-
 ```console
 docker-compose exec conjur conjurctl account create quick-start | tee admin_key
 ```
-
 If there are errors returned, it is likely that the container is still spinning up. Please repeat this step by running docker-compose command to create the account again.
 
 **Prevent data loss: The conjurctl account create command gives you the public key and admin API key for the account you created. Back them up in a safe location.**
@@ -106,18 +97,14 @@ This section describes all configuration requirements for the Jenkins plugin. It
 
 ### 3.1 Login to Conjur
 Initialize Conjur Client
-
 ```console
 docker-compose exec client conjur init -u conjur -a quick-start
 ```
- 
 Logon to Conjur
-
 ```console
 export admin_api_key="$(cat admin_key|awk '/API key for admin/ {print $NF}'|tr '  \n\r' ' '|awk '{$1=$1};1')"
 docker-compose exec client conjur authn login -u admin -p $admin_api_key
 ```
-
 It should display **Logged in** once you are successfully logged in.
 
 ### 3.2 Required Conjur Configurations
@@ -129,7 +116,6 @@ The following configurations are required on Conjur:
 ### 3.3 Declare Jenkins host in Conjur policy
 The following steps create Conjur policy that defines the Jenkins host and adds that host to a layer.
 - Declare a policy branch for Jenkins & save it as a .yml file
-
 ```console
 docker-compose exec client bash
 cat > conjur.yml << EOF
@@ -140,13 +126,10 @@ exit
 ```
 - You may change the id in the above example if desired
 - Load the policy into Conjur under root:
-
 ```console
 docker-compose exec client conjur policy load --replace root /conjur.yml
 ```
-
 - Declare the layer and Jenkins host in another file. Copy the following policy as a template & save it.
-
 ```console
 docker-compose exec client bash
 cat > jenkins-frontend.yml << EOF
@@ -158,7 +141,6 @@ cat > jenkins-frontend.yml << EOF
 EOF
 exit
 ```
-
 This policy does the following:
 - Declares a layer that inherits the name of the policy under which it is loaded. In our example, the layer name will become jenkins-frontend.
 - Declares a host named frontend-01
@@ -167,20 +149,16 @@ This policy does the following:
 - Optionally declare additional Jenkins hosts. Add each new host as a member in the !grant statement.
 
 Load the policy into Conjur under the Jenkins policy branch you declared previously:
-
 ```console
 docker-compose exec client conjur policy load jenkins-frontend /jenkins-frontend.yml | tee frontend.out
 ```
-
 As it creates each new host, Conjur returns an API key.
 
 We will use the host entity later within this tutorial, so let's put it in memory:
-
 ```console
 export frontend_api_key=$(tail -n +2 frontend.out | jq -r '.created_roles."quick-start:host:jenkins-frontend/frontend-01".api_key')
 echo $frontend_api_key
 ```
-
 Save the API keys returned in the previous step. You need them later when configuring Jenkins credentials for logging into Conjur.
 
 ### 3.4 Declare variables in Conjur policy
@@ -189,7 +167,6 @@ The following steps create Conjur policy that defines each variable and provides
 If variables are already defined, you need only add the Jenkins layer to an existing permit statement associated with the variable. The following steps assume that the required variables are not yet declared in Conjur.
 
 Declare a policy branch for the application & save it
-
 ```console
 docker-compose exec client bash
 cat > conjur2.yml << EOF
@@ -198,17 +175,13 @@ cat > conjur2.yml << EOF
 EOF
 exit
 ```
-
 You may change the id in the above example.
 
 Load the policy into Conjur:
-
 ```console
 docker-compose exec client conjur policy load root /conjur2.yml
 ```
-
 Declare the variables, privileges, and entitlements. Copy the following policy as a template:
-
 ```console
 docker-compose exec client bash
 cat > jenkins-app.yml << EOF
@@ -235,7 +208,6 @@ cat > jenkins-app.yml << EOF
 EOF
 exit
 ```
-
 This policy does the following:
 - Declares the variables to be retrieved by Jenkins.
 - Declares the groups that have read & execute privileges on the variables.
@@ -244,11 +216,9 @@ This policy does the following:
 Change the variable names, the group name, and the layer name as appropriate.
 
 Load the policy into Conjur under the Jenkins policy branch you declared previously:
-
 ```console
 docker-compose exec client conjur policy load jenkins-app /jenkins-app.yml
 ```
-
 ### 3.5 Set variable values in Conjur
 Use the Conjur CLI or the UI to set variable values.
 
