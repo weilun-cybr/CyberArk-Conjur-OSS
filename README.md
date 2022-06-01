@@ -37,7 +37,7 @@ docker run -d -u root --name jenkins \
 
 It will take a few minutes to start Jenkins. Meanwhile, let's move on to next step and start deploying Conjur
 
-Visit the Jenkins Console. This should be **http://<<IPAddress>>:8181**.
+Visit the Jenkins Console. This should be **http://(yourIPAddress):8181**.
 
 While prompt for initial password, input the response by this command
   
