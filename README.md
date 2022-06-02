@@ -419,3 +419,38 @@ exit
 ### 5.4 Verify Conjur Secret settings
 Access http://(YourIPAddress):8181/job/Conjur%20Demo/credentials/store/folder/domain/_/credential/DB_PASSWORD/update
 ![Alt text](5.4-Verify-Conjur-Secret-settings.PNG?raw=true "Verify SecretSettings")  
+
+## 6.0 From Pipeline Scripts
+Conjur supports both Jenkins pipeline script & Freestyle project. If you'd like to use Freestyle project, please skip this step and continue to the next step.
+
+### 6.1 Create a pipeline script
+You can create a pipeline script item at http://(YourIPAddress):8181/job/Conjur%20Demo/newJob
+
+Enter **Demo Script** as the item name Choose Pipeline & click OK
+![Alt text](6.0-FromPipelineScripts.PNG?raw=true "Create Pipeline")
+    
+Scroll down to Pipeline. You may need to uncheck Use Groovy Sandbox to make the Script field appear
+
+Copy & Paste the pipeline script to Script field & click Save
+```console
+node {
+      stage('Work') {
+         withCredentials([conjurSecretCredential(credentialsId: 'DB_PASSWORD', variable: 'SECRET')]) {
+            echo "Hello World $SECRET"
+         }
+      }
+      stage('Results') {
+         echo "Finished!"
+      }
+}
+```
+![Alt text](6.0-FromPipelineScripts-TheScript.PNG?raw=true "The Script")
+    
+###6.1 Build It
+Build it (optional)
+Click Build Now to build it
+
+You should be able to find Hello World **** in the log. Note that you may need to look at the Console Output for this.
+![Alt text](6.0-FromPipelineScripts-Console.PNG?raw=true "The Console Output")
+
+
