@@ -231,3 +231,88 @@ For example
 password=$(openssl rand -hex 12)
 docker-compose exec client conjur variable values add jenkins-app/db_password $password
 ```
+    
+## 4.0 Configure Plugin
+Plugin Configuration Use the Jenkins UI to configure the following:
+- Conjur/Jenkins connection information.
+- Credentials stored in Conjur that Jenkins needs to access. Each secret has a Conjur variable path name and a reference ID to use in the Jenkins script or project.
+
+### 4.1 Load Jenkins Dashboard
+You can load the Jenkins' dashboard via the following URL http://(YourIPAddress):8181
+
+The username is **admin** with the password the default **344827fbdbfb40d5aac067c7a07b9230** as we have done initially in 1.0.
+
+### 4.2 Download & install the plugin
+Download jenkins-cli
+```console
+docker exec -it jenkins curl http://localhost:8080/jnlpJars/jenkins-cli.jar --output jenkins-cli.jar
+```    
+Download Conjur secrets plugin 
+```console
+docker exec -it jenkins curl -L https://github.com/cyberark/conjur-credentials-plugin/releases/download/v0.8.0/Conjur.hpi -o /var/jenkins_home/plugins/conjur.hpi
+```
+Update Credential plugin to v2.1.18 or above 
+```console
+docker exec -it jenkins java -jar jenkins-cli.jar -s http://admin:344827fbdbfb40d5aac067c7a07b9230@localhost:8080/ install-plugin credentials -deploy
+```
+
+### 4.3 Define connection information
+There are 2 ways you can do this. Via the CLI or WebUI.
+    
+**Using CLI** 
+    
+You can create the credential by executing the following commands.
+```console
+docker exec -it jenkins sh -c "echo \"<com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl> 
+<scope>GLOBAL</scope>
+  <id>conjur-login</id>
+  <description>Login Credential to Conjur</description>
+  <username>host/jenkins-frontend/frontend-01</username>
+  <password>${frontend_api_key}</password>
+</com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl>\" \
+ | java -jar jenkins-cli.jar -s http://admin:344827fbdbfb40d5aac067c7a07b9230@localhost:8080/ \
+   create-credentials-by-xml system::system::jenkins _ "    
+```
+    
+**Using Jenkins Web UI**
+
+The following steps define the connection to the Conjur appliance. This is typically a one-time configuration.
+- In a browser, go to the Jenkins UI.
+- Navigate to Jenkins > Credentials > System > Global credentials > host-name.
+- The host-name is a Jenkins host. It must match a host that you declared in Conjur policy.
+- On the form that appears, configure the login credentials. These are credentials for the Jenkins host to log into Conjur.
+    - Scope: Select Global.
+    - Username: Enter host/jenkins-frontend/ , where is the network name for the Jenkins host that you declared in Conjur.
+    - Password: Copy and paste the API key that was returned by Conjur when you loaded the policy declaring this host.
+    - ID: The Jenkins ID, natively provided by Jenkins.
+    - Description: Optional. Provide a description to identify this global credential entry.
+
+Access to the Jenkins host and to the credentials is protected by Conjur.
+
+When a host attempts to authenticate with Conjur, Conjur can detect if the request is originating from the host presenting the request. Conjur denies connection if the requestor is not the actual host.
+- Click Save.
+
+### 4.4 Decide whether to set up global or folder-level access to Conjur, or a combination of both.
+- A global configuration allows any job to use the configuration (unless a folder-level configuration overrides the global configuration).
+- A folder-level configuration is specific to jobs in the folder. Folder-level configurations override the global configuration. In a hierarchy of folders, each folder may inherit configuration information from its parent. The top level in such a hierarchy is the global configuration.
+- You may set up a global configuration and override it with folder-level configurations.
+    
+**Using CLI**
+
+You can configure Jenkins manually or by executing the following commands
+```console
+docker exec -it jenkins bash
+cat >>/var/jenkins_home/org.conjur.jenkins.configuration.GlobalConjurConfiguration.xml<<EOF
+<?xml version='1.1' encoding='UTF-8'?>
+<org.conjur.jenkins.configuration.GlobalConjurConfiguration plugin="Conjur@0.2">
+  <conjurConfiguration>
+    <applianceURL>http://192.168.2.206:8080</applianceURL>
+    <account>quick-start</account>
+    <credentialID>conjur-login</credentialID>
+    <certificateCredentialID></certificateCredentialID>
+  </conjurConfiguration>
+EOF
+exit
+```
+If the above command returns an error, it is likely that Jenkins is still being restarted. Please wait for a while and try again
+    
