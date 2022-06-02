@@ -299,14 +299,14 @@ When a host attempts to authenticate with Conjur, Conjur can detect if the reque
     
 **Using CLI**
 
-You can configure Jenkins manually or by executing the following commands
+You can configure Jenkins manually or by executing the following commands. Please remember to change the IP Address of the **applianceURL**. 
 ```console
 docker exec -it jenkins bash
 cat >>/var/jenkins_home/org.conjur.jenkins.configuration.GlobalConjurConfiguration.xml<<EOF
 <?xml version='1.1' encoding='UTF-8'?>
 <org.conjur.jenkins.configuration.GlobalConjurConfiguration plugin="Conjur@0.2">
   <conjurConfiguration>
-    <applianceURL>http://192.168.2.206:8080</applianceURL>
+    <applianceURL>http://**(YourIPAddress)**:8080</applianceURL>
     <account>quick-start</account>
     <credentialID>conjur-login</credentialID>
     <certificateCredentialID></certificateCredentialID>
@@ -315,4 +315,25 @@ EOF
 exit
 ```
 If the above command returns an error, it is likely that Jenkins is still being restarted. Please wait for a while and try again
+    
+**Enable Conjur secrets plugin**
+```console
+docker exec -it jenkins java -jar jenkins-cli.jar -s http://admin:344827fbdbfb40d5aac067c7a07b9230@localhost:8080/ install-plugin https://github.com/cyberark/conjur-credentials-plugin/releases/download/v0.8.0/Conjur.hpi -restart
+```
+
+Jenkins will be restarted, you may need to wait for 1-2 min and login to Jenkins dashboard again to proceed.
+
+### 4.5 Verify Credential created
+Access http://(YourIPAddress):8181/credentials/store/system/domain/_/credential/conjur-login/update
+
+You may need to login to the Jenkins dashboard again as the previous step involves restarting of Jenkins. The username is admin with the password the default 344827fbdbfb40d5aac067c7a07b9230.
+    
+![Alt text](4.5-Verify-Credential-created.PNG?raw=true "Verify Creds")
+    
+### 4.6 Verify Global Configuration
+Access http://(YourIPAddress):8181/configure
+
+You should be able to a section named Conjur Appliance with details configured.
+![Alt text](4.6-Verify-Global-Configuration.PNG?raw=true "Verify Config")
+
     
