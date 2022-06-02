@@ -336,4 +336,86 @@ Access http://(YourIPAddress):8181/configure
 You should be able to a section named Conjur Appliance with details configured.
 ![Alt text](4.6-Verify-Global-Configuration.PNG?raw=true "Verify Config")
 
+## 5.0 Configure Folder
+You can override the global configuration by setting the Conjur Appliance information at Folder level, if the checkbox **Inherit from parent**? is checked, it means it will ignore the values set here, and go up the level navigating to the parent folder, or taking the global configuration if all folder up the hierarchy are inheriting from parent. In our example code, we are not inheriting it. Make changes if you want to. Also remember to change the **applianceURL** to yours. 
+
+### 5.1 Create a folder
+```console
+docker exec -it jenkins bash
+cat >> conjur_folder << _EOF_
+<?xml version='1.1' encoding='UTF-8'?>
+<com.cloudbees.hudson.plugins.folder.Folder plugin="cloudbees-folder@6.4">
+  <actions/>
+  <description></description>
+  <properties>
+    <org.conjur.jenkins.configuration.FolderConjurConfiguration plugin="Conjur@0.2">
+      <inheritFromParent>false</inheritFromParent>
+      <conjurConfiguration>
+        <applianceURL>http://192.168.2.206:8080</applianceURL>
+        <account>quick-start</account>
+        <credentialID>conjur-login</credentialID>
+        <certificateCredentialID></certificateCredentialID>
+      </conjurConfiguration>
+    </org.conjur.jenkins.configuration.FolderConjurConfiguration>
+    <org.jenkinsci.plugins.pipeline.modeldefinition.config.FolderConfig plugin="pipeline-model-definition@1.2.7">
+      <dockerLabel></dockerLabel>
+      <registry plugin="docker-commons@1.11"/>
+    </org.jenkinsci.plugins.pipeline.modeldefinition.config.FolderConfig>
+    <com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider_-FolderCredentialsProperty>
+      <domainCredentialsMap class="hudson.util.CopyOnWriteMap$Hash">
+        <entry>
+          <com.cloudbees.plugins.credentials.domains.Domain plugin="credentials@2.1.18">
+            <specifications/>
+          </com.cloudbees.plugins.credentials.domains.Domain>
+          <java.util.concurrent.CopyOnWriteArrayList>
+            <org.conjur.jenkins.ConjurSecrets.ConjurSecretCredentialsImpl plugin="Conjur@0.2">
+              <id>DB_PASSWORD</id>
+              <description>Conjur Demo Folder DB Password</description>
+              <variablePath>jenkins-app/db_password</variablePath>
+            </org.conjur.jenkins.ConjurSecrets.ConjurSecretCredentialsImpl>
+          </java.util.concurrent.CopyOnWriteArrayList>
+        </entry>
+      </domainCredentialsMap>
+    </com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider_-FolderCredentialsProperty>
+  </properties>
+  <folderViews class="com.cloudbees.hudson.plugins.folder.views.DefaultFolderViewHolder">
+    <views>
+      <hudson.model.AllView>
+        <owner class="com.cloudbees.hudson.plugins.folder.Folder" reference="../../../.."/>
+        <name>All</name>
+        <filterExecutors>false</filterExecutors>
+        <filterQueue>false</filterQueue>
+        <properties class="hudson.model.View$PropertyList"/>
+      </hudson.model.AllView>
+    </views>
+    <tabBar class="hudson.views.DefaultViewsTabBar"/>
+  </folderViews>
+  <healthMetrics>
+    <com.cloudbees.hudson.plugins.folder.health.WorstChildHealthMetric>
+      <nonRecursive>false</nonRecursive>
+    </com.cloudbees.hudson.plugins.folder.health.WorstChildHealthMetric>
+  </healthMetrics>
+  <icon class="com.cloudbees.hudson.plugins.folder.icons.StockFolderIcon"/>
+</com.cloudbees.hudson.plugins.folder.Folder>
+_EOF_
+cat conjur_folder | java -jar jenkins-cli.jar -s http://admin:344827fbdbfb40d5aac067c7a07b9230@localhost:8080/ create-job "Conjur Demo"
+exit
+```
+### 5.2 Verify Folder settings
+Access http://(YourIPAddress):8181/job/Conjur%20Demo/configure
+![Alt text](5.2-Verify-Folder-settings.PNG?raw=true "Verify Folder")    
     
+### 5.3 Create a Conjur Secret in the folder
+```console
+docker exec -it jenkins bash
+echo '<org.conjur.jenkins.conjursecrets.ConjurSecretCredentialsImpl plugin="Conjur@0.5">
+        <id>DB_PASSWORD</id>
+        <description>Conjur Demo Folder Credentials</description>
+        <variablePath>jenkins-app/db_password</variablePath>
+      </org.conjur.jenkins.conjursecrets.ConjurSecretCredentialsImpl>' | java -jar jenkins-cli.jar -s http://admin:344827fbdbfb40d5aac067c7a07b9230@localhost:8080/ create-credentials-by-xml "folder::item::Conjur Demo" "(global)"
+exit
+```
+    
+### 5.4 Verify Conjur Secret settings
+Access http://(YourIPAddress):8181/job/Conjur%20Demo/credentials/store/folder/domain/_/credential/DB_PASSWORD/update
+![Alt text](5.4-Verify-Conjur-Secret-settings.PNG?raw=true "Verify SecretSettings")  
