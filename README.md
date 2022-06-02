@@ -322,6 +322,11 @@ docker exec -it jenkins java -jar jenkins-cli.jar -s http://admin:344827fbdbfb40
 ```
 
 Jenkins will be restarted, you may need to wait for 1-2 min and login to Jenkins dashboard again to proceed.
+    
+If for some reason it didn't start, manually start the Jenkins container.
+```console
+docker start jenkins
+```
 
 ### 4.5 Verify Credential created
 Access http://(YourIPAddress):8181/credentials/store/system/domain/_/credential/conjur-login/update
