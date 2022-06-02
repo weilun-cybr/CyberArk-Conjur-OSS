@@ -451,7 +451,7 @@ node {
 ```
 ![Alt text](6.0-FromPipelineScripts-TheScript.PNG?raw=true "The Script")
     
-###6.1 Build It
+### 6.1 Build It
 Build it (optional)
 Click Build Now to build it
 
