@@ -16,7 +16,7 @@ In this tutorial, you will learn how to secure Jenkins pipelines using Conjur & 
 The Conjur Jenkins plugin retrieves secrets from Conjur for use in Jenkins pipeline scripts or Freestyle projects.
 
 ## Requirements
-This tutorial is tested in AWS Linux. We will assume that you have docker and docker-compose installed. Follow the guide here. 
+This tutorial is tested in AWS Linux (T3 Medium). We will assume that you have docker and docker-compose installed. Follow the guide here. 
 https://www.cyberciti.biz/faq/how-to-install-docker-on-amazon-linux-2/
 
 You will also need jq installed.
